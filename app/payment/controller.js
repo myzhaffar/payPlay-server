@@ -1,4 +1,5 @@
-const Bank = require("./model");
+const Payment = require("./model");
+const Bank = require("../bank/model");
 
 module.exports = {
     index: async (req, res) => {
@@ -7,98 +8,104 @@ module.exports = {
             const alertStatus = req.flash("alertStatus");
 
             const alert = { message: alertMessage, status: alertStatus };
-            const bank = await Bank.find();
+            const payment = await Payment.find().populate('banks');
 
-            res.render("admin/bank/view_bank", {
-                bank, alert, name: req.session.user.name,
-                title: 'Halaman Bank'
+            res.render("admin/payment/view_payment", {
+                payment,
+                alert,
+                name: req.session.user.name,
+                title: 'Halaman Payment'
             });
         } catch (err) {
             req.flash("alertMessage", `${err.message}`);
             req.flash("alertStatus", "danger");
-            res.redirect("/bank");
+            res.redirect("/payment");
         }
     },
     viewCreate: async (req, res) => {
         try {
-            res.render("admin/bank/create", {
+            const banks = await Bank.find()
+            res.render("admin/payment/create", {
+                banks,
                 name: req.session.user.name,
-                title: 'Halaman Tambah Bank'
+                title: 'Halaman Tambah Payment'
             });
         } catch (err) {
             req.flash("alertMessage", `${err.message}`);
             req.flash("alertStatus", "danger");
-            res.redirect("/bank");
+            res.redirect("/payment");
         }
     },
     actionCreate: async (req, res) => {
         try {
-            const { name, nameBank, noRekening } = req.body;
+            const { banks, type } = req.body;
 
-            let bank = await Bank({ name, nameBank, noRekening });
-            await bank.save();
+            let payment = await Payment({ banks, type });
+            await payment.save();
 
-            req.flash("alertMessage", "Berhasil tambah bank");
+            req.flash("alertMessage", "Berhasil tambah payment");
             req.flash("alertStatus", "success");
 
-            res.redirect("/bank");
+            res.redirect("/payment");
         } catch (err) {
             req.flash("alertMessage", `${err.message}`);
             req.flash("alertStatus", "danger");
-            res.redirect("/bank");
+            res.redirect("/payment");
         }
     },
     viewEdit: async (req, res) => {
         try {
             const { id } = req.params;
 
-            const bank = await Bank.findOne({ _id: id });
+            const payment = await Payment.findOne({ _id: id }).populate('banks');
+            const banks = await Bank.find()
 
-            res.render("admin/bank/edit", {
-                bank,
+            res.render("admin/payment/edit", {
+                payment,
+                banks,
                 name: req.session.user.name,
-                title: 'Halaman Edit Bank'
+                title: 'Halaman Metode Payment'
             });
         } catch (err) {
             req.flash("alertMessage", `${err.message}`);
             req.flash("alertStatus", "danger");
-            res.redirect("/bank");
+            res.redirect("/payment");
         }
     },
     actionEdit: async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, nameBank, noRekening } = req.body;
+            const { banks, type } = req.body;
 
-            await Bank.findOneAndUpdate(
+            await Payment.findOneAndUpdate(
                 { _id: id },
-                { name, nameBank, noRekening }
+                { banks, type }
             );
 
-            req.flash("alertMessage", "Berhasil ubah bank");
+            req.flash("alertMessage", "Berhasil ubah payment");
             req.flash("alertStatus", "success");
 
-            res.redirect("/bank");
+            res.redirect("/payment");
         } catch (err) {
             req.flash("alertMessage", `${err.message}`);
             req.flash("alertStatus", "danger");
-            res.redirect("/bank");
+            res.redirect("/payment");
         }
     },
     actionDelete: async (req, res) => {
         try {
             const { id } = req.params;
 
-            await Bank.findOneAndRemove({ _id: id });
+            await Payment.findOneAndRemove({ _id: id });
 
-            req.flash("alertMessage", "Berhasil hapus bank");
+            req.flash("alertMessage", "Berhasil hapus payment");
             req.flash("alertStatus", "success");
 
-            res.redirect("/bank");
+            res.redirect("/payment");
         } catch (err) {
             req.flash("alertMessage", `${err.message}`);
             req.flash("alertStatus", "danger");
-            res.redirect("/bank");
+            res.redirect("/payment");
         }
     },
 };
