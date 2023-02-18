@@ -7,13 +7,14 @@ const methodOverride = require("method-override");
 const session = require("express-session");
 const flash = require("connect-flash");
 
+const transactionRouter = require("./app/transaction/router");
 const dashboardRouter = require("./app/dashboard/router");
 const categoryRouter = require("./app/category/router");
+const paymentRouter = require("./app/payment/router");
 const nominalRouter = require("./app/nominal/router");
 const voucherRouter = require("./app/voucher/router");
-const bankRouter = require("./app/bank/router");
-const paymentRouter = require("./app/payment/router");
 const usersRouter = require("./app/users/router");
+const bankRouter = require("./app/bank/router");
 
 var app = express();
 
@@ -42,12 +43,13 @@ app.use(
 );
 
 app.use("/", usersRouter);
+app.use("/transaction", transactionRouter);
 app.use("/dashboard", dashboardRouter);
 app.use("/category", categoryRouter);
 app.use("/nominal", nominalRouter);
 app.use("/voucher", voucherRouter);
-app.use("/bank", bankRouter);
 app.use("/payment", paymentRouter);
+app.use("/bank", bankRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
